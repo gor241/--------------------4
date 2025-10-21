@@ -1,0 +1,6 @@
+dist
+node_modules
+*.config.*
+vite.config.*
+vitest.config.*
+build
