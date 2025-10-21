@@ -26,7 +26,7 @@ export function getRatesSource(): RatesSource {
  * - fxratesapi: GET {BASE}/latest?api_key=... -> { base, rates }
  * Throws Error with user-friendly message on failure.
  */
-export async function fetchRates(): Promise<RatesResponse> {
+export async function fetchRates(signal?: AbortSignal): Promise<RatesResponse> {
   const source = getRatesSource();
   const baseEnv = import.meta.env.VITE_API_BASE;
   const baseUrl =
@@ -38,7 +38,10 @@ export async function fetchRates(): Promise<RatesResponse> {
   const url = buildUrl(`${normalizedBase}${path}`, query);
 
   try {
-    const payload = await getJSON<RatesPayload>(url, { timeoutMs: REQUEST_TIMEOUT_MS });
+    const payload = await getJSON<RatesPayload>(url, {
+      timeoutMs: REQUEST_TIMEOUT_MS,
+      signal,
+    });
 
     if (!isValidRatesPayload(payload)) {
       throw new Error('Invalid rates payload');

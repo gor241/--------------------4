@@ -12,7 +12,7 @@ export function ResultBlock({ value, code }: Props): JSX.Element {
       : formatMoney(value, code);
 
   return (
-    <div className="result-block" role="status" aria-live="polite">
+    <div className="result-block" role="status" aria-live="polite" aria-label={display}>
       {display}
     </div>
   );

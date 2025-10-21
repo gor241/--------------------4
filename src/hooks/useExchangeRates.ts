@@ -43,6 +43,7 @@ export function useExchangeRates(online: boolean): {
 } {
   const [state, setState] = useState<HookState>(INITIAL_STATE);
   const inFlightRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const setData = useCallback((payload: RatesResponse, timestamp: number) => {
     setState((prev) => {
@@ -104,6 +105,11 @@ export function useExchangeRates(online: boolean): {
         return;
       }
 
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      abortControllerRef.current = new AbortController();
       inFlightRef.current = true;
 
       if (options.forceLoading) {
@@ -123,16 +129,21 @@ export function useExchangeRates(online: boolean): {
       }
 
       try {
-        const payload = await fetchRates();
+        const payload = await fetchRates(abortControllerRef.current.signal);
         const timestamp = Date.now();
 
         writeRatesCache(payload, { api: getRatesSource() });
         setData(payload, timestamp);
       } catch (error) {
+        if (error instanceof Error && error.message === 'Request cancelled') {
+          return;
+        }
+
         const message = error instanceof Error ? error.message : 'Failed to fetch rates';
         setError(message);
       } finally {
         inFlightRef.current = false;
+        abortControllerRef.current = null;
       }
     },
     [clearError, online, setData, setError],
@@ -169,6 +180,14 @@ export function useExchangeRates(online: boolean): {
   const reload = useCallback(async () => {
     await runFetch({ forceLoading: true, offlineMessage: 'Offline: cannot refresh' });
   }, [runFetch]);
+
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
 
   return useMemo(
     () => ({

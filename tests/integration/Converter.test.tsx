@@ -36,14 +36,12 @@ function renderConverter() {
 
 describe('Converter integration', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
     mockUseExchangeRates.mockReturnValue(createBaseState());
     mockUseOnlineStatus.mockReturnValue({ online: true, lastChangedAt: null });
     window.localStorage.clear();
   });
 
   afterEach(() => {
-    vi.useRealTimers();
     mockUseExchangeRates.mockReset();
     mockUseOnlineStatus.mockReset();
   });
@@ -54,59 +52,57 @@ describe('Converter integration', () => {
     const badge = screen.getByRole('status', { name: /online/i });
     expect(badge).toBeInTheDocument();
 
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup();
     const amountInput = screen.getByLabelText(/amount/i);
     await user.clear(amountInput);
     await user.type(amountInput, '100,00');
 
-    vi.advanceTimersByTime(250);
-
-    await waitFor(() => {
-      expect(screen.getByRole('status', { name: /120[.,]00/ })).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByRole('status', { name: /120[.,]00/ })).toBeInTheDocument();
+      },
+      { timeout: 1000 },
+    );
   });
 
   it('swaps currencies and recalculates result', async () => {
     renderConverter();
 
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup();
     const amountInput = screen.getByLabelText(/amount/i);
     await user.clear(amountInput);
     await user.type(amountInput, '10');
 
-    vi.advanceTimersByTime(250);
-
     await user.click(screen.getByRole('button', { name: /swap currencies/i }));
 
-    vi.advanceTimersByTime(250);
-
-    await waitFor(() => {
-      expect(screen.getByRole('status', { name: /8[.,]33/ })).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByRole('status', { name: /8[.,]33/ })).toBeInTheDocument();
+      },
+      { timeout: 1000 },
+    );
   });
 
   it('disables refresh button while reload promise is pending', async () => {
-    const reload = vi.fn(
-      () => new Promise<void>((resolve) => setTimeout(resolve, 100)),
-    );
+    const reload = vi.fn(() => new Promise<void>((resolve) => setTimeout(resolve, 100)));
     mockUseExchangeRates.mockReturnValue({ ...createBaseState(), reload });
 
     renderConverter();
 
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    const user = userEvent.setup();
     const refreshButton = screen.getByRole('button', { name: /refresh/i });
     await user.click(refreshButton);
 
     expect(refreshButton).toBeDisabled();
 
-    vi.advanceTimersByTime(100);
-    await vi.runOnlyPendingTimersAsync();
-
     expect(reload).toHaveBeenCalledTimes(1);
 
-    await waitFor(() => {
-      expect(refreshButton).not.toBeDisabled();
-    });
+    await waitFor(
+      () => {
+        expect(refreshButton).not.toBeDisabled();
+      },
+      { timeout: 1000 },
+    );
   });
 
   it('renders offline banner with cached timestamp when offline', () => {

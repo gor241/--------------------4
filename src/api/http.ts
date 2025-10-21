@@ -8,6 +8,7 @@ export type QueryParams = Record<string, string | number | boolean | null | unde
 export interface GetJSONOptions {
   headers?: Record<string, string>;
   timeoutMs?: number;
+  signal?: AbortSignal;
 }
 
 /**
@@ -40,73 +41,103 @@ export function buildUrl(base: string, params?: QueryParams): string {
  * @param options Optional request configuration.
  */
 export async function getJSON<T>(url: string, options: GetJSONOptions = {}): Promise<T> {
-  const { headers, timeoutMs = DEFAULT_TIMEOUT_MS } = options;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const { headers, timeoutMs = DEFAULT_TIMEOUT_MS, signal: externalSignal } = options;
+  const maxRetries = 2;
+  const retryDelays = [500, 1000];
 
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: { ...DEFAULT_HEADERS, ...headers },
-      signal: controller.signal,
-    });
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-    const rawBody = await response.text();
-
-    if (!response.ok) {
-      let errorDetail = rawBody || response.statusText;
-
-      if (rawBody) {
-        try {
-          const parsed = JSON.parse(rawBody) as Record<string, unknown>;
-
-          if (parsed && typeof parsed === 'object') {
-            const message = parsed.message ?? parsed.error;
-
-            if (typeof message === 'string' && message.trim().length > 0) {
-              errorDetail = message;
-            }
-          }
-        } catch {
-          // Ignore JSON parsing error for error responses, fallback to raw body.
-        }
+    if (externalSignal) {
+      if (externalSignal.aborted) {
+        clearTimeout(timeout);
+        throw new Error('Request cancelled');
       }
 
-      const detailSuffix = errorDetail ? ` - ${errorDetail}` : '';
-      throw new Error(`Request failed with status ${response.status}${detailSuffix}`);
+      externalSignal.addEventListener('abort', () => controller.abort(), { once: true });
     }
-
-    if (!rawBody) {
-      throw new Error('Invalid JSON');
-    }
-
-    let parsedBody: unknown;
 
     try {
-      parsedBody = JSON.parse(rawBody) as unknown;
-    } catch {
-      throw new Error('Invalid JSON');
-    }
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { ...DEFAULT_HEADERS, ...headers },
+        signal: controller.signal,
+      });
 
-    if (parsedBody === null || typeof parsedBody !== 'object') {
-      throw new Error('Invalid JSON');
-    }
+      const rawBody = await response.text();
 
-    return parsedBody as T;
-  } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') {
-      throw new Error('Request timeout');
-    }
+      if (!response.ok) {
+        let errorDetail = rawBody || response.statusText;
 
-    if (
-      error instanceof Error &&
-      (error.message === 'Invalid JSON' || error.message.startsWith('Request failed'))
-    ) {
-      throw error;
-    }
+        if (rawBody) {
+          try {
+            const parsed = JSON.parse(rawBody) as Record<string, unknown>;
 
-    throw new Error('Network error');
-  } finally {
-    clearTimeout(timeout);
+            if (parsed && typeof parsed === 'object') {
+              const message = parsed.message ?? parsed.error;
+
+              if (typeof message === 'string' && message.trim().length > 0) {
+                errorDetail = message;
+              }
+            }
+          } catch {
+            // Ignore JSON parsing error for error responses, fallback to raw body.
+          }
+        }
+
+        const detailSuffix = errorDetail ? ` - ${errorDetail}` : '';
+        throw new Error(`Request failed with status ${response.status}${detailSuffix}`);
+      }
+
+      if (!rawBody) {
+        throw new Error('Invalid JSON');
+      }
+
+      let parsedBody: unknown;
+
+      try {
+        parsedBody = JSON.parse(rawBody) as unknown;
+      } catch {
+        throw new Error('Invalid JSON');
+      }
+
+      if (parsedBody === null || typeof parsedBody !== 'object') {
+        throw new Error('Invalid JSON');
+      }
+
+      return parsedBody as T;
+    } catch (error) {
+      clearTimeout(timeout);
+
+      const isAbortError = error instanceof DOMException && error.name === 'AbortError';
+      const isNetworkError = error instanceof TypeError;
+      const isRetriableError = isAbortError || isNetworkError;
+      const canRetry = attempt < maxRetries && isRetriableError;
+
+      if (!canRetry) {
+        if (isAbortError) {
+          if (externalSignal?.aborted) {
+            throw new Error('Request cancelled');
+          }
+          throw new Error('Request timeout');
+        }
+
+        if (
+          error instanceof Error &&
+          (error.message === 'Invalid JSON' ||
+            error.message === 'Request cancelled' ||
+            error.message.startsWith('Request failed'))
+        ) {
+          throw error;
+        }
+
+        throw new Error('Network error');
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, retryDelays[attempt]));
+    }
   }
+
+  throw new Error('Network error');
 }

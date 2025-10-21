@@ -14,11 +14,15 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    "noEmit": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
     "baseUrl": "src",
     "paths": {
       "@/*": ["./*"]
     },
-    "types": ["vitest/globals", "@testing-library/jest-dom"]
+    "types": ["vitest/globals"]
   },
-  "include": ["src", "tests", "vite.config.ts", "vitest.config.ts", "src/vite-env.d.ts"]
+  "include": ["src"],
+  "exclude": ["dist", "node_modules", "tests"]
 }

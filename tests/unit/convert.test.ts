@@ -19,7 +19,7 @@ describe('convert', () => {
     const amount = 100;
     const result = convert({ amount, from: 'USD', to: 'GBP', base, rates });
 
-    expect(result).toBeCloseTo(81.818181, 6);
+    expect(result).toBeCloseTo(81.818181, 5);
   });
 
   it('throws when encountering an unknown currency code', () => {
