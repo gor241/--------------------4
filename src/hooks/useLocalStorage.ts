@@ -1,44 +1,63 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
-type Serializer<T> = {
-  read: (value: string | null) => T;
-  write: (value: T) => string;
-};
+const hasStorage = typeof window !== 'undefined' && 'localStorage' in window;
 
-const defaultSerializer: Serializer<unknown> = {
-  read: (value) => (value === null ? null : JSON.parse(value)),
-  write: (value) => JSON.stringify(value),
-};
+function readValue<T>(key: string, fallback: T): T {
+  if (!hasStorage) {
+    return fallback;
+  }
 
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (raw === null) {
+      return fallback;
+    }
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeValue<T>(key: string, value: T): void {
+  if (!hasStorage) {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Swallow write errors silently; hook should never throw.
+  }
+}
+
+/**
+ * Persist a piece of state in localStorage while remaining SSR-safe.
+ * @example
+ * const [theme, setTheme] = useLocalStorage('theme', 'light');
+ * setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
+ */
 export function useLocalStorage<T>(
   key: string,
   initialValue: T,
-  serializer: Serializer<T> = defaultSerializer as Serializer<T>,
-): [T, (value: T) => void] {
-  const [state, setState] = useState<T>(() => {
-    try {
-      const stored = window.localStorage.getItem(key);
-      if (stored === null) {
-        return initialValue;
-      }
-      return serializer.read(stored);
-    } catch (error) {
-      console.warn(`Failed to read localStorage key "${key}"`, error);
-      return initialValue;
-    }
-  });
+): readonly [T, (next: T | ((prev: T) => T)) => void] {
+  const [storedValue, setStoredValue] = useState<T>(() => readValue(key, initialValue));
 
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(key, serializer.write(state));
-    } catch (error) {
-      console.warn(`Failed to write localStorage key "${key}"`, error);
-    }
-  }, [key, serializer, state]);
+  const setValue = useCallback(
+    (next: T | ((prev: T) => T)) => {
+      setStoredValue((previous) => {
+        const resolvedValue =
+          typeof next === 'function' ? (next as (prev: T) => T)(previous) : next;
 
-  const store = useCallback((value: T) => {
-    setState(value);
-  }, []);
+        if (Object.is(previous, resolvedValue)) {
+          return previous;
+        }
 
-  return [state, store];
+        writeValue(key, resolvedValue);
+        return resolvedValue;
+      });
+    },
+    [key],
+  );
+
+  return [storedValue, setValue] as const;
 }

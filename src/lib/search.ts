@@ -1,19 +1,30 @@
-import type { CurrencyMeta } from '@/types/currencyMeta';
+/**
+ * Filter a currency list by query, matching against code, name, or optional symbol while preserving order.
+ * Returns the original list reference when the trimmed query is empty.
+ */
+export function filterCurrencies<
+  T extends { code: string; name: string; symbol?: string },
+>(query: string, list: readonly T[]): T[] {
+  const trimmed = typeof query === 'string' ? query.trim() : '';
 
-export function filterCurrencies(list: CurrencyMeta[], query: string): CurrencyMeta[] {
-  if (!query.trim()) {
-    return list;
+  if (trimmed.length === 0) {
+    return list as T[];
   }
 
-  const normalized = query.trim().toLowerCase();
+  const normalizedQuery = trimmed.toLowerCase();
+  const matches: T[] = [];
 
-  return list.filter((currency) => {
-    const tokens = [
-      currency.code,
-      currency.name,
-      currency.symbol ?? '',
-      currency.symbolNative ?? '',
-    ];
-    return tokens.some((token) => token?.toLowerCase().includes(normalized));
-  });
+  for (const item of list) {
+    const codeMatches = item.code.toLowerCase().includes(normalizedQuery);
+    const nameMatches = item.name.toLowerCase().includes(normalizedQuery);
+    const symbolMatches =
+      typeof item.symbol === 'string' &&
+      item.symbol.toLowerCase().includes(normalizedQuery);
+
+    if (codeMatches || nameMatches || symbolMatches) {
+      matches.push(item);
+    }
+  }
+
+  return matches;
 }

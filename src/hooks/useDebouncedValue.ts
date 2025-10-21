@@ -1,12 +1,28 @@
 import { useEffect, useState } from 'react';
 
-export function useDebouncedValue<T>(value: T, delay = 250): T {
-  const [debounced, setDebounced] = useState<T>(value);
+/**
+ * Return a debounced version of the provided value.
+ * @example
+ * const debouncedQuery = useDebouncedValue(query, 300);
+ */
+export function useDebouncedValue<T>(value: T, delayMs: number = 250): T {
+  const isImmediate = !Number.isFinite(delayMs) || delayMs <= 0;
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setDebounced(value), delay);
-    return () => window.clearTimeout(timer);
-  }, [value, delay]);
+    if (isImmediate) {
+      setDebouncedValue(value);
+      return undefined;
+    }
 
-  return debounced;
+    const timerId = window.setTimeout(() => {
+      setDebouncedValue(value);
+    }, delayMs);
+
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [value, delayMs, isImmediate]);
+
+  return isImmediate ? value : debouncedValue;
 }
