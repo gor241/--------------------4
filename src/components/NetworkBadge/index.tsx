@@ -1,15 +1,20 @@
-type NetworkBadgeProps = {
+type Props = {
   online: boolean;
-  lastChangedAt: number | null;
+  updatedAt: number | null;
 };
 
-export function NetworkBadge({ online, lastChangedAt }: NetworkBadgeProps): JSX.Element {
+export function NetworkBadge({ online, updatedAt }: Props): JSX.Element {
+  const status = online ? 'Online' : 'Offline';
+  const hasTimestamp = typeof updatedAt === 'number';
+  const formatted = hasTimestamp ? new Date(updatedAt).toLocaleString() : null;
+
   return (
-    <div role="status" aria-live="polite">
-      <strong>{online ? 'Online' : 'Offline'}</strong>
-      {!online && lastChangedAt && (
-        <span>Using cached rates from {new Date(lastChangedAt).toLocaleString()}</span>
-      )}
+    <div className="network-badge" role="status" aria-live="polite">
+      <strong>{status}</strong>
+      {formatted ? <span className="network-badge__time">{formatted}</span> : null}
+      {!online && formatted ? (
+        <span className="network-badge__hint">Using cached rates from {formatted}</span>
+      ) : null}
     </div>
   );
 }

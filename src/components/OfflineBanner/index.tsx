@@ -1,22 +1,15 @@
-type OfflineBannerProps = {
-  visible: boolean;
-  timestamp: number | null;
+type Props = {
+  updatedAt: number | null;
 };
 
-export function OfflineBanner({
-  visible,
-  timestamp,
-}: OfflineBannerProps): JSX.Element | null {
-  if (!visible) {
-    return null;
-  }
+export function OfflineBanner({ updatedAt }: Props): JSX.Element {
+  const formatted =
+    typeof updatedAt === 'number' ? new Date(updatedAt).toLocaleString() : null;
 
   return (
-    <aside role="status" aria-live="assertive">
-      <p>Offline mode enabled.</p>
-      {timestamp && (
-        <small>Using cached rates from {new Date(timestamp).toLocaleString()}</small>
-      )}
+    <aside className="offline-banner" role="status" aria-live="polite">
+      <span>Offline — using cached data</span>
+      {formatted ? <span className="offline-banner__time">{formatted}</span> : null}
     </aside>
   );
 }

@@ -1,35 +1,19 @@
-import { formatCurrency } from '@/lib/format';
+import { formatMoney } from '@/lib/money';
 
-type ResultBlockProps = {
-  amount: number;
-  from: string;
-  to: string;
-  converted: number | null;
-  rate: number | null;
+type Props = {
+  value: number | null;
+  code: string;
 };
 
-export function ResultBlock({
-  amount,
-  from,
-  to,
-  converted,
-  rate,
-}: ResultBlockProps): JSX.Element {
-  const formattedAmount = formatCurrency(amount, from);
-  const formattedConverted = formatCurrency(converted, to);
-  const formattedRate = formatCurrency(rate, to);
+export function ResultBlock({ value, code }: Props): JSX.Element {
+  const display =
+    value === null || Number.isNaN(value) || !Number.isFinite(value)
+      ? '—'
+      : formatMoney(value, code);
 
   return (
-    <section aria-live="polite">
-      <p>
-        {formattedAmount} → {to}
-      </p>
-      <p>{formattedConverted}</p>
-      {rate !== null && (
-        <small>
-          1 {from} = {formattedRate}
-        </small>
-      )}
-    </section>
+    <div className="result-block" role="status" aria-live="polite">
+      {display}
+    </div>
   );
 }

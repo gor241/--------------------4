@@ -1,11 +1,18 @@
-type SwapButtonProps = {
-  onSwap: () => void;
+type Props = {
+  onClick: () => void;
+  disabled?: boolean;
 };
 
-export function SwapButton({ onSwap }: SwapButtonProps): JSX.Element {
+export function SwapButton({ onClick, disabled }: Props): JSX.Element {
   return (
-    <button type="button" onClick={onSwap} aria-label="Swap currencies">
-      ⇅
+    <button
+      type="button"
+      className="swap-button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label="Swap currencies"
+    >
+      ⇄
     </button>
   );
 }
