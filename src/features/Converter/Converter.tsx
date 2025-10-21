@@ -1,163 +1,161 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
+import { useOnlineStatus } from '@/app/providers/OnlineProvider';
 import { AmountInput } from '@/components/AmountInput';
-import { CurrencyModal } from '@/components/CurrencyModal';
 import { CurrencySelect } from '@/components/CurrencySelect';
 import { NetworkBadge } from '@/components/NetworkBadge';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { ResultBlock } from '@/components/ResultBlock';
 import { Skeleton } from '@/components/Skeleton';
 import { SwapButton } from '@/components/SwapButton';
-import { useOnlineStatus } from '@/app/providers/OnlineProvider';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
-import { useKeyboardListNav } from '@/hooks/useKeyboardListNav';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import currenciesData from '@/data/currencies.json';
-import { parseAmount } from '@/lib/money';
-import { filterCurrencies } from '@/lib/search';
-import type { CurrencyMeta } from '@/types/currencyMeta';
+import { convert } from '@/lib/convert';
+import { getSupportedCodesFromRates, makeDisplayList } from '@/lib/currencyList';
+import { parseAmount } from '@/lib/format';
 
-const DEFAULT_PAIR: { from: string; to: string } = { from: 'USD', to: 'EUR' };
-const DEFAULT_AMOUNT = '100';
+const DEFAULT_FROM = 'EUR';
+const DEFAULT_TO = 'USD';
+const DEFAULT_AMOUNT = '1';
 
 export function Converter(): JSX.Element {
   const { online, lastChangedAt } = useOnlineStatus();
-  const [amountInput, setAmountInput] = useLocalStorage<string>(
-    'converter::amount',
-    DEFAULT_AMOUNT,
-  );
-  const [pair, setPair] = useLocalStorage<{ from: string; to: string }>(
-    'converter::pair',
-    DEFAULT_PAIR,
-  );
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [modalTarget, setModalTarget] = useState<'from' | 'to'>('from');
-  const [modalQuery, setModalQuery] = useState('');
+  const { data, updatedAt, loading, error, reload } = useExchangeRates(online);
 
-  const currencies = currenciesData as CurrencyMeta[];
-  const filteredCurrencies = useMemo(
-    () => filterCurrencies(currencies, modalQuery),
-    [currencies, modalQuery],
-  );
+  const [from, setFrom] = useLocalStorage('cc-from', DEFAULT_FROM);
+  const [to, setTo] = useLocalStorage('cc-to', DEFAULT_TO);
+  const [amountRaw, setAmountRaw] = useLocalStorage('cc-amount', DEFAULT_AMOUNT);
 
-  const { highlightedIndex, handleKeyDown, setHighlightedIndex } = useKeyboardListNav(
-    filteredCurrencies.length,
-    (nextIndex) => {
-      if (nextIndex === -1) {
-        setModalOpen(false);
-        return;
-      }
+  const debouncedAmount = useDebouncedValue(amountRaw);
+  const parsedAmount = useMemo(() => parseAmount(debouncedAmount), [debouncedAmount]);
 
-      const currency = filteredCurrencies[nextIndex];
-      if (currency) {
-        handleCurrencySelect(currency.code);
-      }
+  const supportedCodes = useMemo(() => {
+    if (!data) {
+      return [] as string[];
+    }
+
+    return getSupportedCodesFromRates(data.rates, data.base);
+  }, [data]);
+
+  const currencies = useMemo(() => {
+    if (supportedCodes.length === 0) {
+      return [];
+    }
+
+    return makeDisplayList(supportedCodes, { sort: 'alpha' });
+  }, [supportedCodes]);
+
+  const supportedSet = useMemo(() => new Set(supportedCodes), [supportedCodes]);
+  const fromSupported = !data || supportedSet.has(from);
+  const toSupported = !data || supportedSet.has(to);
+
+  const result = useMemo(() => {
+    if (!data) {
+      return null;
+    }
+
+    if (Number.isNaN(parsedAmount) || !Number.isFinite(parsedAmount)) {
+      return null;
+    }
+
+    if (!fromSupported || !toSupported) {
+      return null;
+    }
+
+    try {
+      return convert({
+        amount: parsedAmount,
+        from,
+        to,
+        base: data.base,
+        rates: data.rates,
+      });
+    } catch {
+      return null;
+    }
+  }, [data, from, fromSupported, parsedAmount, to, toSupported]);
+
+  const unsupportedMessage = useMemo(() => {
+    if (!data) {
+      return null;
+    }
+
+    if (!fromSupported) {
+      return `Currency ${from} is not available in the latest rates.`;
+    }
+
+    if (!toSupported) {
+      return `Currency ${to} is not available in the latest rates.`;
+    }
+
+    return null;
+  }, [data, from, fromSupported, to, toSupported]);
+
+  const [isReloading, setIsReloading] = useState(false);
+
+  const handleAmountChange = useCallback(
+    (value: string) => {
+      setAmountRaw(value);
     },
+    [setAmountRaw],
   );
 
-  useEffect(() => {
-    setHighlightedIndex(0);
-  }, [modalQuery, filteredCurrencies.length, setHighlightedIndex]);
+  const handleSwap = useCallback(() => {
+    setFrom(to);
+    setTo(from);
+  }, [from, setFrom, setTo, to]);
 
-  const debouncedAmount = useDebouncedValue(amountInput);
-  const numericAmount = useMemo(() => parseAmount(debouncedAmount), [debouncedAmount]);
+  const handleReload = useCallback(async () => {
+    setIsReloading(true);
 
-  const { status, error, rates, refresh, convert } = useExchangeRates(pair.from, [
-    pair.to,
-  ]);
-  const conversion = convert(numericAmount, pair.from, pair.to);
+    try {
+      await reload();
+    } finally {
+      setIsReloading(false);
+    }
+  }, [reload]);
 
-  function handleAmountChange(value: string) {
-    setAmountInput(value);
-  }
-
-  function handleOpenModal(target: 'from' | 'to') {
-    setModalTarget(target);
-    setModalOpen(true);
-    setModalQuery('');
-    setHighlightedIndex(0);
-  }
-
-  function handleCurrencySelect(code: string) {
-    const nextPair = { ...pair, [modalTarget]: code } as typeof pair;
-    setPair(nextPair);
-    setModalOpen(false);
-    setModalQuery('');
-  }
-
-  function handleSwap() {
-    setPair({ from: pair.to, to: pair.from });
-  }
-
-  function handleRefresh() {
-    void refresh();
-  }
-
-  const selectedCurrency = modalTarget === 'from' ? pair.from : pair.to;
+  const shouldShowError = !loading && (error || unsupportedMessage);
+  const errorMessage = error ?? unsupportedMessage;
+  const timestamp = updatedAt ?? lastChangedAt;
 
   return (
-    <div>
-      <header>
-        <NetworkBadge online={online} lastChangedAt={lastChangedAt} />
+    <div className="converter">
+      <header className="converter__header">
+        <NetworkBadge online={online} updatedAt={updatedAt} />
+        <button
+          type="button"
+          onClick={handleReload}
+          disabled={isReloading}
+          aria-disabled={isReloading}
+          className="converter__refresh"
+        >
+          {isReloading ? 'Refreshing…' : 'Refresh'}
+        </button>
       </header>
 
-      <main>
-        <section>
-          <AmountInput value={amountInput} onChange={handleAmountChange} />
-          <div>
-            <CurrencySelect
-              label="From"
-              value={pair.from}
-              onOpenModal={() => handleOpenModal('from')}
-            />
-            <SwapButton onSwap={handleSwap} />
-            <CurrencySelect
-              label="To"
-              value={pair.to}
-              onOpenModal={() => handleOpenModal('to')}
-            />
+      {!online ? <OfflineBanner updatedAt={timestamp ?? null} /> : null}
+
+      <main className="converter__main">
+        <AmountInput value={amountRaw} onChange={handleAmountChange} />
+
+        <div className="currency-row">
+          <CurrencySelect value={from} onChange={setFrom} currencies={currencies} />
+          <SwapButton onClick={handleSwap} />
+          <CurrencySelect value={to} onChange={setTo} currencies={currencies} />
+        </div>
+
+        {loading ? (
+          <Skeleton lines={2} />
+        ) : shouldShowError ? (
+          <div role="alert" className="converter__error">
+            {errorMessage}
           </div>
-        </section>
-
-        <section>
-          {status === 'loading' && <Skeleton height="4rem" />}
-          {status === 'error' && <p role="alert">{error}</p>}
-          {status !== 'loading' && status !== 'error' && (
-            <ResultBlock
-              amount={numericAmount}
-              from={pair.from}
-              to={pair.to}
-              converted={conversion.result}
-              rate={conversion.rate}
-            />
-          )}
-        </section>
+        ) : (
+          <ResultBlock value={result} code={to} />
+        )}
       </main>
-
-      <OfflineBanner visible={!online} timestamp={rates?.timestamp ?? lastChangedAt} />
-
-      <CurrencyModal
-        isOpen={isModalOpen}
-        currencies={filteredCurrencies}
-        selectedCode={selectedCurrency}
-        query={modalQuery}
-        highlightedIndex={highlightedIndex}
-        onQueryChange={setModalQuery}
-        onSelect={handleCurrencySelect}
-        onClose={() => setModalOpen(false)}
-        onKeyDown={handleKeyDown}
-      />
-
-      <button type="button" onClick={handleRefresh}>
-        Refresh rates
-      </button>
-
-      <footer>
-        <small>
-          Last updated: {rates ? new Date(rates.timestamp).toLocaleString() : '—'}
-        </small>
-      </footer>
     </div>
   );
 }
