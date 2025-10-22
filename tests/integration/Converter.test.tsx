@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -111,17 +111,16 @@ describe('Converter integration', () => {
 
     renderConverter();
 
-    const bannerText = screen.getByText(/offline — using cached data/i);
-    const banner = bannerText.closest('[role="status"]') as HTMLElement | null;
-    expect(banner).not.toBeNull();
-
-    if (!banner) {
-      return;
-    }
-
-    const bannerScope = within(banner);
     const timestampText = new Date(BASE_TIMESTAMP).toLocaleString();
-    expect(bannerScope.getByText(/using cached data/i)).toBeInTheDocument();
-    expect(bannerScope.getByText(timestampText)).toBeInTheDocument();
+    const banner = screen.getByText((content, element) => {
+      return (
+        element?.tagName.toLowerCase() === 'span' &&
+        content.includes('Using cached rates from') &&
+        content.includes(timestampText)
+      );
+    });
+
+    expect(banner).toBeInTheDocument();
+    expect(banner.closest('[role="status"]')).toHaveAttribute('class', 'offline-banner');
   });
 });
