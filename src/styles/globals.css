@@ -422,6 +422,108 @@ main {
   }
 }
 
+/* Currency Modal */
+.currency-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 20, 32, 0.85);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-3);
+}
+
+.currency-modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  max-width: 480px;
+  width: 100%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.currency-modal input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  border-bottom: 1px solid rgba(230, 237, 247, 0.12);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.currency-modal input:focus {
+  outline: none;
+  border-bottom-color: var(--primary);
+}
+
+.currency-modal__empty {
+  padding: var(--space-5);
+  text-align: center;
+  color: var(--muted);
+}
+
+/* Currency Modal List */
+.cur-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-2);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.cur-item {
+  display: grid;
+  grid-template-columns: 28px 1fr auto auto;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.cur-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.cur-item[aria-selected="true"] {
+  background: rgba(110, 168, 254, 0.12);
+  outline: 1px solid rgba(110, 168, 254, 0.35);
+}
+
+.cur-flag {
+  width: 28px;
+  height: 18px;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.cur-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cur-code {
+  font-weight: 600;
+  padding: 0.125rem 0.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.875rem;
+}
+
+.cur-symbol {
+  color: var(--muted);
+  margin-left: var(--space-2);
+  font-size: 0.875rem;
+}
+
 /* Animations */
 @keyframes pulse {
   0% {

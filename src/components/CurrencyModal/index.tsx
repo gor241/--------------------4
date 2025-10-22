@@ -224,6 +224,7 @@ export function CurrencyModal({
           role="listbox"
           tabIndex={-1}
           aria-activedescendant={activeId}
+          className="cur-list"
         >
           {filtered.map((currency, index) => {
             const isSelected = currency.code === selectedCode;
@@ -237,7 +238,7 @@ export function CurrencyModal({
                 aria-selected={isSelected}
                 data-code={currency.code}
                 data-index={index}
-                className={`currency-modal__item${isActive ? ' is-active' : ''}${isSelected ? ' is-selected' : ''}`}
+                className="cur-item"
                 onMouseEnter={handleItemMouseEnter}
                 onMouseDown={handleItemMouseDown}
                 onClick={handleItemClick}
@@ -248,13 +249,13 @@ export function CurrencyModal({
                     src={currency.flagSrc}
                     alt=""
                     aria-hidden="true"
-                    className="currency-modal__flag"
+                    className="cur-flag"
                   />
                 ) : null}
-                <span className="currency-modal__name">{currency.name}</span>
-                <span className="currency-modal__code">{currency.code}</span>
+                <span className="cur-name">{currency.name}</span>
+                <span className="cur-code">{currency.code}</span>
                 {currency.symbol ? (
-                  <span className="currency-modal__symbol">{currency.symbol}</span>
+                  <span className="cur-symbol">{currency.symbol}</span>
                 ) : null}
               </li>
             );

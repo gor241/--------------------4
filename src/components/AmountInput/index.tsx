@@ -59,8 +59,9 @@ export function AmountInput({
         placeholder={placeholderText}
         aria-invalid={isInvalid}
         aria-describedby={hintId}
+        className="input"
       />
-      <p id={hintId} className="amount-input__hint">
+      <p id={hintId} className="amount-input__hint muted">
         Use numbers with optional comma or dot for decimals.
       </p>
     </div>

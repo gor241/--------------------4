@@ -9,9 +9,14 @@ export function NetworkBadge({ online, updatedAt }: Props): JSX.Element {
   const formatted = hasTimestamp ? new Date(updatedAt).toLocaleString() : null;
 
   return (
-    <div className="network-badge" role="status" aria-live="polite" aria-label={status}>
+    <div
+      className="network-badge card"
+      role="status"
+      aria-live="polite"
+      aria-label={status}
+    >
       <strong>{status}</strong>
-      {formatted ? <span className="network-badge__time">{formatted}</span> : null}
+      {formatted ? <span className="muted">{formatted}</span> : null}
     </div>
   );
 }

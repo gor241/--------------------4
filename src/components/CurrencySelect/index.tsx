@@ -59,7 +59,7 @@ export function CurrencySelect({
     <>
       <button
         type="button"
-        className="currency-select"
+        className="btn"
         onClick={handleOpen}
         aria-label={ariaLabel}
         aria-haspopup="dialog"
@@ -74,7 +74,7 @@ export function CurrencySelect({
           />
         ) : null}
         <span className="currency-select__code">{code}</span>
-        {symbol ? <span className="currency-select__symbol">{symbol}</span> : null}
+        {symbol ? <span className="currency-select__symbol muted">{symbol}</span> : null}
       </button>
       <Suspense fallback={null}>
         <CurrencyModal

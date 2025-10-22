@@ -121,15 +121,15 @@ export function Converter(): JSX.Element {
   const timestamp = updatedAt ?? lastChangedAt;
 
   return (
-    <div className="converter">
-      <header className="converter__header">
+    <div className="container">
+      <header className="header-row">
         <NetworkBadge online={online} updatedAt={updatedAt} />
         <button
           type="button"
           onClick={handleReload}
           disabled={isReloading}
           aria-disabled={isReloading}
-          className="converter__refresh"
+          className="btn"
         >
           {isReloading ? 'Refreshing…' : 'Refresh'}
         </button>
@@ -137,7 +137,7 @@ export function Converter(): JSX.Element {
 
       {!online ? <OfflineBanner updatedAt={timestamp ?? null} /> : null}
 
-      <main className="converter__main">
+      <main className="card">
         <AmountInput value={amountRaw} onChange={handleAmountChange} />
 
         <div className="currency-row">
