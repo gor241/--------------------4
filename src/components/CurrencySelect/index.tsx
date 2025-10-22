@@ -1,8 +1,12 @@
-import { useCallback, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 
 import type { CurrencyMeta } from '@/lib/currencyList';
 
-import { CurrencyModal } from '@/components/CurrencyModal';
+const CurrencyModal = lazy(() =>
+  import('@/components/CurrencyModal').then((module) => ({
+    default: module.CurrencyModal,
+  })),
+);
 
 type Props = {
   value: string;
@@ -72,13 +76,15 @@ export function CurrencySelect({
         <span className="currency-select__code">{code}</span>
         {symbol ? <span className="currency-select__symbol">{symbol}</span> : null}
       </button>
-      <CurrencyModal
-        open={open}
-        onClose={handleClose}
-        list={currencies}
-        selectedCode={value}
-        onSelect={handleSelect}
-      />
+      <Suspense fallback={null}>
+        <CurrencyModal
+          open={open}
+          onClose={handleClose}
+          list={currencies}
+          selectedCode={value}
+          onSelect={handleSelect}
+        />
+      </Suspense>
     </>
   );
 }

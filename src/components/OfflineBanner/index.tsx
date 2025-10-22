@@ -8,8 +8,11 @@ export function OfflineBanner({ updatedAt }: Props): JSX.Element {
 
   return (
     <aside className="offline-banner" role="status" aria-live="polite">
-      <span>Offline — using cached data</span>
-      {formatted ? <span className="offline-banner__time">{formatted}</span> : null}
+      {formatted ? (
+        <span>Using cached rates from {formatted}</span>
+      ) : (
+        <span>Offline — using cached data</span>
+      )}
     </aside>
   );
 }
