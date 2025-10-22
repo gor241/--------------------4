@@ -59,7 +59,7 @@ export function CurrencySelect({
     <>
       <button
         type="button"
-        className="btn"
+        className="currency-select"
         onClick={handleOpen}
         aria-label={ariaLabel}
         aria-haspopup="dialog"

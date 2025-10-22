@@ -129,7 +129,7 @@ export function Converter(): JSX.Element {
           onClick={handleReload}
           disabled={isReloading}
           aria-disabled={isReloading}
-          className="btn"
+          className="converter__refresh"
         >
           {isReloading ? 'Refreshing…' : 'Refresh'}
         </button>
