@@ -1,64 +1,175 @@
-# Currency Converter — React + TypeScript
+# 💱 Конвертер валют — React + TypeScript
 
-SPA to convert currencies with live FX rates, cache, and offline support.
+**Современное веб-приложение** для конвертации валют в реальном времени  
+с поддержкой кеширования, офлайн-режима и адаптивного дизайна.
 
-## Tech Stack
-- Vite, React, TypeScript, Vitest, and React Testing Library
-- LocalStorage caching with a five-minute TTL and offline fallback
-- Rate providers: VATComply or fxratesapi.com selected via environment configuration
+🔗 **Демо:** [https://4-theta-lake.vercel.app/](https://4-theta-lake.vercel.app/)
 
-## Getting Started
-- Prerequisites: Node.js LTS (18+ recommended)
-- Install dependencies:
-  ```bash
-  npm install
-  ```
-- Start the development server:
-  ```bash
-  npm run dev
-  ```
-- Create a production build:
-  ```bash
-  npm run build
-  ```
-- Run the test suite:
-  ```bash
-  npm run test
-  ```
-- Lint and format code:
-  ```bash
-  npm run lint
-  npm run format
-  ```
+---
 
-## Environment Configuration
-Create a `.env` file in the project root and set the rate provider:
+## 🚀 Возможности
+
+| 💡 Функция | 📋 Описание |
+|------------|-------------|
+| 💵 **Live-конвертация** | Мгновенный пересчёт валют с актуальными курсами |
+| ⏱ **Дебаунс 250 мс** | Исключает лишние пересчёты при вводе |
+| 🔁 **Swap-кнопка** | Мгновенно меняет валюты местами |
+| 📦 **Кеш на 5 минут** | Данные хранятся в LocalStorage с TTL |
+| 📡 **Офлайн-режим** | При потере сети используются закешированные данные |
+| 🔍 **Поиск валюты** | По коду или названию |
+| 🎹 **Клавиатурная навигация** | Поддержка Enter / Esc / ↑ / ↓ |
+| 📱 **Адаптивный интерфейс** | Оптимизация под мобильные и десктопы |
+| 🇷🇺 **Русский интерфейс + ₽** | Полная локализация и поддержка рубля |
+
+---
+
+## 🧭 Скриншоты интерфейса
+
+### 💻 Десктоп
+![Desktop](./screenshots/image1.png)
+
+### 🔎 Модальное окно выбора валют
+![Desktop](./screenshots/image2.png)
+
+### 📱 Мобильная версия
+![Mobile](./screenshots/image3.png)
+
+### 🔎 Модальное окно выбора валют
+![Mobile](./screenshots/image4.png)
+
+---
+
+## ⚙️ Технологический стек
+
+- ⚛ **React 18 + TypeScript** — строгая типизация и современный подход  
+- ⚡ **Vite** — быстрая сборка и dev-сервер  
+- 🧪 **Vitest + React Testing Library** — unit и интеграционные тесты  
+- 💾 **LocalStorage TTL Cache** — собственная логика кеширования  
+- 🔄 **AbortController + Retry** — устойчивость к ошибкам сети  
+- 🪶 **React.lazy + Suspense** — ленивые загрузки для оптимизации  
+- ♿ **ARIA + A11y** — доступность интерфейса  
+- 🎨 **CSS Variables + Responsive Design**
+
+---
+
+## 📂 Архитектура проекта
+
+```
+
+src/
+├── api/            # Работа с API (fetch, обработка, нормализация)
+├── app/            # Провайдеры (сеть, состояние приложения)
+├── components/     # Универсальные UI-компоненты
+├── features/       # Основной экран конвертера
+├── hooks/          # Хуки: кеш, дебаунс, обмен курсами
+├── lib/            # Утилиты: конвертация, форматирование, поиск
+├── data/           # Список валют (currencies.json)
+├── styles/         # Глобальные стили, брейкпоинты
+└── tests/          # Unit и интеграционные тесты
+
+````
+
+---
+
+## 💾 Офлайн и кеширование
+
+- **TTL:** 5 минут  
+- **Хранилище:** LocalStorage  
+- **Поведение:**
+  - При успешном запросе → данные сохраняются в кеш  
+  - Если сети нет → используется кеш  
+  - При истечении TTL → данные обновляются в фоне  
+- **UI-индикация:**
+  - 🟢 Онлайн — «Онлайн»  
+  - 🟡 Офлайн — «Используются закешированные данные от {timestamp}»
+
+---
+
+## 🧪 Тестирование
+
+| Область | Проверка |
+|----------|-----------|
+| 🧮 `convert.ts` | Формулы пересчёта и работа с базовой валютой |
+| 💰 `money.ts`, `format.ts` | Округление, форматирование и валидация |
+| 🗄️ `cache.ts` | TTL-логика и поведение при офлайн-режиме |
+| 🪟 `CurrencyModal.test.tsx` | Поиск и выбор валюты |
+| 🔗 `Converter.test.tsx` | Полный сценарий взаимодействия пользователя |
+
 ```bash
+npm run test
+````
+
+---
+
+## ⚙️ Переменные окружения
+
+```env
 VITE_RATES_API=vats
 VITE_API_BASE=https://api.vatcomply.com
-# For fxrates:
-# VITE_RATES_API=fxrates
-# VITE_API_BASE=https://api.fxratesapi.com
-# VITE_API_KEY=YOUR_KEY
 ```
-`VITE_RATES_API` selects the provider (`vats` or `fxrates`). `VITE_API_BASE` points to the provider endpoint, and `VITE_API_KEY` is only required when using fxratesapi.
 
-## Architecture Overview
-- Entry point: `src/main.tsx` mounts the app shell and global providers.
-- Feature composition: `src/features/Converter/Converter.tsx` wires inputs, selectors, result display, and network indicators.
-- Components: modular UI elements in `src/components/*` (AmountInput, CurrencySelect, ResultBlock, etc.).
-- Hooks: `src/hooks` contains shared logic (`useExchangeRates`, `useDebouncedValue`, `useLocalStorage`, keyboard navigation).
-- Lib utilities: currency formatting, conversion math, search, caching, and money helpers live in `src/lib`.
-- API layer: `src/api/http.ts` and `src/api/ratesService.ts` wrap fetch, provider selection, and normalization.
-- Data: currency metadata in `data/currencies.json` with TypeScript helpers in `src/data`.
-- Cache strategy: `useExchangeRates` stores the last successful response in LocalStorage with a five-minute TTL, refreshes in the background when online, and falls back to cached data offline.
-- Live UX: input value is debounced (~250 ms) and manual rate refresh is throttled to avoid spamming the API.
-- Accessibility: modal and form controls expose ARIA labels, announce statuses, and support full keyboard navigation (↑/↓, Enter, Esc).
+💡 Можно переключить провайдера на `fxrates`:
 
-## Development Notes
-- Strict TypeScript mode enforced; ESLint and Prettier configurations ensure consistent style.
-- Testing strategy combines unit tests for lib utilities and hooks with integration/UI coverage for converter flows and modal interactions.
-- Known limitations / future ideas: add a PWA manifest for installable offline experience; consider virtualized lists for very large currency datasets.
+```env
+VITE_RATES_API=fxrates
+VITE_API_BASE=https://api.fxratesapi.com
+VITE_API_KEY=YOUR_KEY
+```
 
-## Deployment
-- Deploy to Vercel or Netlify with build command `npm run build` and output directory `dist/`.
+---
+
+## 🚀 Как запустить локально
+
+### Требования
+
+* Node.js 18+ (LTS)
+
+### Команды
+
+```bash
+# Установка зависимостей
+npm install
+
+# Запуск dev-сервера
+npm run dev
+
+# Сборка production
+npm run build
+
+# Тестирование
+npm run test
+
+# Линтинг и форматирование
+npm run lint
+npm run format
+```
+
+---
+
+## 🎨 Адаптивный дизайн
+
+* Поддержка экранов от **320 px до 1440 px+**
+* **Mobile-first** стратегия
+* Шрифты и отступы подстраиваются под устройство
+* Полная клавиатурная навигация (включая модальные окна)
+
+---
+
+## 🔮 Возможные улучшения
+
+* 📲 **PWA** — офлайн-установка на устройство
+* 🧭 **E2E-тестирование** (Playwright / Cypress)
+* 🌍 **Мультиязычность (i18n)**
+* ⚡ **Виртуализация списка валют** при большом количестве
+* 🧠 **GraphQL-API** вместо REST
+
+---
+
+## 👤 Автор
+
+Разработано с вниманием к архитектуре, UX и чистому коду.
+**Frontend:** React + TypeScript / Vite
+**Автор:** *Руслан Нуриев*
+
+🔗 **Деплой:** [https://4-theta-lake.vercel.app/](https://4-theta-lake.vercel.app/)
+---
