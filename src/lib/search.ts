@@ -1,7 +1,4 @@
-/**
- * Filter a currency list by query, matching against code, name, or optional symbol while preserving order.
- * Returns the original list reference when the trimmed query is empty.
- */
+// Фильтрация валют по коду, названию или символу
 export function filterCurrencies<
   T extends { code: string; name: string; symbol?: string },
 >(query: string, list: readonly T[]): T[] {

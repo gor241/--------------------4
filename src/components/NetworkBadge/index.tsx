@@ -4,9 +4,9 @@ type Props = {
 };
 
 export function NetworkBadge({ online, updatedAt }: Props): JSX.Element {
-  const status = online ? 'Online' : 'Offline';
+  const status = online ? 'Онлайн' : 'Офлайн';
   const hasTimestamp = typeof updatedAt === 'number';
-  const formatted = hasTimestamp ? new Date(updatedAt).toLocaleString() : null;
+  const formatted = hasTimestamp ? new Date(updatedAt).toLocaleString('ru-RU') : null;
 
   return (
     <div

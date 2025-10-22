@@ -1012,13 +1012,13 @@
     "flagSrc": "https://flagcdn.com/h40/rs.png"
   },
   {
-    "name": "Russian Ruble",
-    "symbol": "RUB",
-    "symbolNative": "₽.",
+    "name": "Российский рубль",
+    "symbol": "₽",
+    "symbolNative": "₽",
     "decimalDigits": 2,
     "rounding": 0,
     "code": "RUB",
-    "namePlural": "Russian rubles",
+    "namePlural": "Российские рубли",
     "countryCodeISO2": "RU",
     "flagSrc": "https://flagcdn.com/h40/ru.png"
   },

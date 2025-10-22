@@ -52,7 +52,7 @@ export function CurrencySelect({
     [onChange],
   );
 
-  const ariaLabel = label ?? `Choose currency (${value})`;
+  const ariaLabel = label ?? `Выбрать валюту (текущая: ${value})`;
   const { flagSrc, code, symbol } = currentCurrency;
 
   return (

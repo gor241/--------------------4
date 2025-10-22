@@ -16,16 +16,12 @@ type SortMode = 'none' | 'alpha';
 
 const currencyByCode = CURRENCY_BY_CODE as Record<string, CurrencyMeta>;
 
-/**
- * Normalize a currency code to uppercase without surrounding whitespace.
- */
+// Нормализация кода валюты: верхний регистр, без пробелов
 export function normalizeCode(code: string): string {
   return code.trim().toUpperCase();
 }
 
-/**
- * Collect supported currency codes from API rates, keeping the base first.
- */
+// Получение списка поддерживаемых валют (база первая)
 export function getSupportedCodesFromRates(
   rates: Record<string, number>,
   base: string,
@@ -35,9 +31,7 @@ export function getSupportedCodesFromRates(
   return dedupeNormalizedCodes(candidates);
 }
 
-/**
- * Return display metadata for the provided code, using fallback values when unknown.
- */
+// Получение метаданных валюты с фолбэком для неизвестных кодов
 export function makeDisplayMeta(code: string): CurrencyMeta {
   const normalized = normalizeCode(code);
   const meta = currencyByCode[normalized];
@@ -59,9 +53,7 @@ export function makeDisplayMeta(code: string): CurrencyMeta {
   };
 }
 
-/**
- * Build a display-ready list of currency metadata from API codes.
- */
+// Формирование списка валют для отображения с опциональной сортировкой
 export function makeDisplayList(
   apiCodes: string[],
   opts?: {
@@ -81,9 +73,7 @@ export function makeDisplayList(
   return metadata;
 }
 
-/**
- * Determine whether the provided code exists in the currency metadata map.
- */
+// Проверка наличия валюты в справочнике
 export function isKnownCurrency(code: string): boolean {
   const normalized = normalizeCode(code);
 

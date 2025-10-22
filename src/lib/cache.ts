@@ -18,10 +18,7 @@ type WriteOptions = {
   api?: 'vats' | 'fxrates';
 };
 
-/**
- * Read the cached FX rates from LocalStorage.
- * Returns null when cache is missing, invalid, or on access failure.
- */
+// Чтение кешированных курсов из LocalStorage
 export function readRatesCache(): RatesCacheEntry | null {
   try {
     const storage = getStorage();
@@ -48,10 +45,7 @@ export function readRatesCache(): RatesCacheEntry | null {
   }
 }
 
-/**
- * Persist FX rates payload to LocalStorage.
- * Returns true on success and false when persisting fails.
- */
+// Запись курсов в кеш с отметкой времени
 export function writeRatesCache(payload: RatesResponse, opts?: WriteOptions): boolean {
   try {
     const storage = getStorage();
@@ -74,9 +68,7 @@ export function writeRatesCache(payload: RatesResponse, opts?: WriteOptions): bo
   }
 }
 
-/**
- * Determine if the provided timestamp has exceeded the TTL.
- */
+// Проверка истечения TTL кеша
 export function isExpired(
   timestamp: number,
   ttl: number = DEFAULT_CACHE_TTL,
@@ -92,10 +84,7 @@ export function isExpired(
   return safeNow - timestamp > safeTtl;
 }
 
-/**
- * Remove the cached FX rates from LocalStorage.
- * Returns true on success and false when removal fails.
- */
+// Очистка кешированных курсов
 export function clearRatesCache(): boolean {
   try {
     const storage = getStorage();

@@ -14,7 +14,7 @@ type Props = {
 
 type ActiveItemRef = MutableRefObject<HTMLLIElement | null>;
 
-const ARIA_LABEL = 'Select currency';
+const ARIA_LABEL = 'Выбор валюты';
 
 export function CurrencyModal({
   open,
@@ -215,8 +215,8 @@ export function CurrencyModal({
           type="text"
           value={query}
           onChange={handleSearchChange}
-          placeholder="Search currency"
-          aria-label="Search currency"
+          placeholder="Поиск по коду или названию"
+          aria-label="Поиск по коду или названию"
         />
         <ul
           id={listboxId}
@@ -262,7 +262,7 @@ export function CurrencyModal({
           })}
           {filtered.length === 0 ? (
             <li className="currency-modal__empty" role="presentation">
-              No currencies found.
+              Валюты не найдены.
             </li>
           ) : null}
         </ul>

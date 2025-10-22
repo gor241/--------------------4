@@ -8,7 +8,6 @@
     'Segoe UI',
     sans-serif;
   
-  /* Color System */
   --bg: #0f1420;
   --surface: #1a2233;
   --surface-alt: #202a3f;
@@ -17,15 +16,12 @@
   --primary: #6ea8fe;
   --danger: #ff6b6b;
   
-  /* Border Radius */
   --radius: 14px;
   --radius-lg: 18px;
   
-  /* Shadows & Effects */
   --shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
   --ring: 0 0 0 3px rgba(110, 168, 254, 0.35);
   
-  /* Spacing Scale */
   --space-1: 0.5rem;
   --space-2: 0.75rem;
   --space-3: 1rem;
@@ -33,7 +29,6 @@
   --space-5: 2rem;
   --space-6: 2.5rem;
   
-  /* Typography */
   --font-size: 16px;
   --font-size-lg: 18px;
   --font-size-xl: 32px;
@@ -76,7 +71,6 @@ main {
   display: block;
 }
 
-/* Design System Helpers */
 .card {
   background: var(--surface);
   border-radius: var(--radius-lg);
@@ -98,7 +92,6 @@ main {
   color: var(--muted);
 }
 
-/* Input & Button System */
 .input {
   width: 100%;
   background: transparent;
@@ -117,7 +110,6 @@ main {
   border-color: var(--danger);
 }
 
-/* Layout System */
 .container {
   max-width: 720px;
   margin: 0 auto;
@@ -180,7 +172,6 @@ main {
   }
 }
 
-/* Legacy converter class - kept for compatibility */
 .converter {
   max-width: 720px;
   margin: 0 auto;
@@ -345,7 +336,6 @@ main {
   line-height: 1.5;
 }
 
-/* Result Block */
 .result {
   background: var(--surface-alt);
   border-radius: var(--radius);
@@ -371,7 +361,6 @@ main {
   }
 }
 
-/* Skeleton Loading */
 .skeleton {
   display: flex;
   flex-direction: column;
@@ -389,7 +378,6 @@ main {
   animation: pulse 1.2s ease-in-out infinite;
 }
 
-/* Banners & Badges */
 .offline-banner {
   position: sticky;
   top: 0;
@@ -455,7 +443,6 @@ main {
   }
 }
 
-/* Currency Modal */
 .currency-modal__backdrop {
   position: fixed;
   inset: 0;
@@ -509,7 +496,6 @@ main {
   color: var(--muted);
 }
 
-/* Currency Modal List */
 .cur-list {
   list-style: none;
   margin: 0;

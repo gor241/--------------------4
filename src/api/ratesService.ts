@@ -12,20 +12,13 @@ export interface RatesResponse {
 
 type RatesSource = 'vats' | 'fxrates';
 
-/**
- * Helper that returns the configured source id: 'vats' | 'fxrates'
- */
+// Возвращает источник курсов из переменных окружения
 export function getRatesSource(): RatesSource {
   const flag = import.meta.env.VITE_RATES_API;
   return flag === 'fxrates' ? 'fxrates' : 'vats';
 }
 
-/**
- * Fetch latest FX rates from configured provider and normalize to { base, rates }.
- * - VATComply: GET {BASE}/rates  -> { base, rates }
- * - fxratesapi: GET {BASE}/latest?api_key=... -> { base, rates }
- * Throws Error with user-friendly message on failure.
- */
+// Загрузка курсов валют из API (VATComply или fxratesapi)
 export async function fetchRates(signal?: AbortSignal): Promise<RatesResponse> {
   const source = getRatesSource();
   const baseEnv = import.meta.env.VITE_API_BASE;

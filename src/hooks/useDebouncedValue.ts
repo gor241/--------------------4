@@ -1,10 +1,6 @@
 import { useEffect, useState } from 'react';
 
-/**
- * Return a debounced version of the provided value.
- * @example
- * const debouncedQuery = useDebouncedValue(query, 300);
- */
+// Дебаунс значения: пересчёт через delayMs
 export function useDebouncedValue<T>(value: T, delayMs: number = 250): T {
   const isImmediate = !Number.isFinite(delayMs) || delayMs <= 0;
   const [debouncedValue, setDebouncedValue] = useState<T>(value);

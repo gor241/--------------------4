@@ -11,11 +11,7 @@ export interface GetJSONOptions {
   signal?: AbortSignal;
 }
 
-/**
- * Build an absolute URL with query parameters appended.
- * @param base A fully qualified base URL.
- * @param params Optional query parameters to append.
- */
+// Построение URL с query-параметрами
 export function buildUrl(base: string, params?: QueryParams): string {
   const url = new URL(base);
 
@@ -34,12 +30,7 @@ export function buildUrl(base: string, params?: QueryParams): string {
   return url.toString();
 }
 
-/**
- * Perform an HTTP GET request that resolves with parsed JSON data.
- * @template T Expected response payload shape.
- * @param url Target URL to request. Should be absolute.
- * @param options Optional request configuration.
- */
+// HTTP GET с парсингом JSON, таймаутом и повторами
 export async function getJSON<T>(url: string, options: GetJSONOptions = {}): Promise<T> {
   const { headers, timeoutMs = DEFAULT_TIMEOUT_MS, signal: externalSignal } = options;
   const maxRetries = 2;
@@ -82,7 +73,7 @@ export async function getJSON<T>(url: string, options: GetJSONOptions = {}): Pro
               }
             }
           } catch {
-            // Ignore JSON parsing error for error responses, fallback to raw body.
+            // Игнорируем ошибку парсинга
           }
         }
 

@@ -1,10 +1,6 @@
 const DECIMAL_SEPARATORS = /[.,]/g;
 
-/**
- * Parse user-entered amount supporting both "." and "," as decimal separators.
- * Handles common thousand separators and whitespace.
- * Returns NaN if the input cannot be parsed into a finite number.
- */
+// Парсинг суммы: поддерживает точку и запятую как десятичный разделитель
 export function parseAmount(input: string): number {
   const trimmed = input.trim();
 
@@ -64,11 +60,7 @@ function normalizeNumberString(value: string, decimalIndex: number | null): stri
   return fractionalPart === '' ? integerPart : `${integerPart}.${fractionalPart}`;
 }
 
-/**
- * Localized number formatting with sane defaults.
- * - Defaults: maximumFractionDigits = 2, minimumFractionDigits = 0, locale = undefined (user agent)
- * - Does not apply currency-specific rounding (that happens in money.ts)
- */
+// Форматирование числа с дефолтными параметрами дробной части
 export function formatNumber(
   value: number,
   opts?: {

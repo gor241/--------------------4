@@ -26,16 +26,11 @@ function writeValue<T>(key: string, value: T): void {
   try {
     window.localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // Swallow write errors silently; hook should never throw.
+    // Игнорируем ошибки записи
   }
 }
 
-/**
- * Persist a piece of state in localStorage while remaining SSR-safe.
- * @example
- * const [theme, setTheme] = useLocalStorage('theme', 'light');
- * setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
- */
+// Сохранение состояния в localStorage (SSR-safe)
 export function useLocalStorage<T>(
   key: string,
   initialValue: T,

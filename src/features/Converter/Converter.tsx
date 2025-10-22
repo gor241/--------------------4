@@ -82,11 +82,11 @@ export function Converter(): JSX.Element {
     }
 
     if (!fromSupported) {
-      return `Currency ${from} is not available in the latest rates.`;
+      return `Конвертация недоступна: код валюты ${from} не поддерживается.`;
     }
 
     if (!toSupported) {
-      return `Currency ${to} is not available in the latest rates.`;
+      return `Конвертация недоступна: код валюты ${to} не поддерживается.`;
     }
 
     return null;
@@ -131,7 +131,7 @@ export function Converter(): JSX.Element {
           aria-disabled={isReloading}
           className="converter__refresh"
         >
-          {isReloading ? 'Refreshing…' : 'Refresh'}
+          {isReloading ? 'Обновление…' : 'Обновить'}
         </button>
       </header>
 

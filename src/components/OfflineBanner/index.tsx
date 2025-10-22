@@ -4,14 +4,14 @@ type Props = {
 
 export function OfflineBanner({ updatedAt }: Props): JSX.Element {
   const formatted =
-    typeof updatedAt === 'number' ? new Date(updatedAt).toLocaleString() : null;
+    typeof updatedAt === 'number' ? new Date(updatedAt).toLocaleString('ru-RU') : null;
 
   return (
     <aside className="offline-banner" role="status" aria-live="polite">
       {formatted ? (
-        <span>Using cached rates from {formatted}</span>
+        <span>Используются курсы из кеша от {formatted}</span>
       ) : (
-        <span>Offline — using cached data</span>
+        <span>Автономный режим — используются кешированные данные</span>
       )}
     </aside>
   );

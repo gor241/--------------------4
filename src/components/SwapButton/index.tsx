@@ -10,7 +10,7 @@ export function SwapButton({ onClick, disabled }: Props): JSX.Element {
       className="swap-button"
       onClick={onClick}
       disabled={disabled}
-      aria-label="Swap currencies"
+      aria-label="Поменять валюты местами"
     >
       ⇄
     </button>

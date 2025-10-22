@@ -23,14 +23,13 @@ export function AmountInput({
   const generatedId = useId();
   const inputId = id ?? `amount-input-${generatedId}`;
   const hintId = `${inputId}-hint`;
-  const labelText = label ?? 'Amount';
+  const labelText = label ?? 'Сумма';
   const placeholderText = placeholder ?? '0';
   const trimmedValue = value.trim();
   const isInvalid = trimmedValue !== '' && Number.isNaN(parseAmount(value));
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const rawValue = event.target.value;
-    // Limit input to digits plus decimal separators; strip any other characters.
     const withoutSpaces = rawValue.replace(/\s+/g, '');
     const sanitized = withoutSpaces.replace(/[^0-9.,]/g, '');
 
@@ -62,7 +61,7 @@ export function AmountInput({
         className="input"
       />
       <p id={hintId} className="amount-input__hint muted">
-        Use numbers with optional comma or dot for decimals.
+        Используйте числа, допускаются запятая или точка как десятичный разделитель.
       </p>
     </div>
   );

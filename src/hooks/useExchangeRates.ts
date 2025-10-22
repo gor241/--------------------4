@@ -29,11 +29,7 @@ type FetchOptions = {
   offlineMessage?: string;
 };
 
-/**
- * Manage FX rates with cache-first logic and optional background refresh when stale.
- * The hook reads cached data, surfaces it immediately, and refreshes from the network
- * when online and the cached payload is expired. Manual reload is exposed via `reload`.
- */
+// Загрузка курсов: кеш + фоновое обновление при истечении TTL
 export function useExchangeRates(online: boolean): {
   data: RatesResponse | null;
   updatedAt: number | null;
